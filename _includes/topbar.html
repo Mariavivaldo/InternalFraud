@@ -1,0 +1,33 @@
+{%- assign kws = page.board.keywords | default: site.data.briefing.keywords -%}
+<header class="topbar">
+  <a class="brand" href="{{ '/' | relative_url }}">{{ site.title | upcase | escape }}</a>
+
+  <div class="tb-field cal-wrap">
+    <span class="tb-label" id="edition-label">Edition</span>
+    <button type="button" class="tb-control cal-toggle" id="cal-toggle"
+            aria-haspopup="dialog" aria-expanded="false" aria-controls="calendar"
+            aria-labelledby="edition-label cal-current"
+            data-current="{{ page.board.date_iso }}">
+      <svg class="ico" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><rect x="3" y="4.5" width="14" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 8.5h14M7 2.5v4M13 2.5v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span id="cal-current">{{ page.board.date_short | default: 'Browse editions' }}</span>
+      <svg class="ico caret" viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="calendar" id="calendar" role="dialog" aria-label="Choose an edition" hidden></div>
+  </div>
+
+  <div class="tb-field">
+    <label class="tb-label" for="kw-select">Keyword</label>
+    <select id="kw-select" class="tb-control" data-keyword-select>
+      {%- if page.board %}
+      <option value="">All keywords ({{ kws.size }})</option>
+      {%- else %}
+      <option value="{{ '/keywords/' | relative_url }}">All keywords</option>
+      {%- endif %}
+      {%- for k in kws %}
+      <option value="{{ k.url | relative_url }}"{% if k.slug == page.list.current_slug %} selected{% endif %}>{{ k.name }}</option>
+      {%- endfor %}
+    </select>
+  </div>
+
+  <a class="tb-link" href="{{ '/keywords/' | relative_url }}">All keywords A–Z</a>
+</header>

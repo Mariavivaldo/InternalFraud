@@ -1,0 +1,16 @@
+# Optional region settings. Regions work without anything here: each one appears the
+# first day a briefing includes it and gets the next color automatically.
+#
+# Use this file only to rename a region, fix the column order on the board, choose
+# colors, or hide a region that is no longer covered. Example:
+#
+# - id: us
+#   name: United States
+# - id: hk
+#   name: Hong Kong
+#   bg: "#ECE3F5"     # column/background color
+#   fg: "#4A1D7A"     # text color on that background
+# - id: au
+#   hidden: true      # stop showing it on days it has no items
+#
+# Regions listed here come first on the board, in this order.

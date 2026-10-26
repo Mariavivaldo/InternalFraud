@@ -1,0 +1,24 @@
+---
+layout: default
+---
+{%- assign K = page.keyword_index -%}
+<div class="list-page">
+  <header class="list-head">
+    <div class="eyebrow">ALL KEYWORDS</div>
+    <h1 class="list-title">Keywords A–Z</h1>
+    <p class="list-meta">{{ K.total }} {% if K.total == 1 %}keyword{% else %}keywords{% endif %} used so far. The number is how many items carry it.</p>
+  </header>
+  {%- if K.total == 0 %}
+  <div class="empty big">No keywords yet. They appear once the first briefing is published.</div>
+  {%- endif %}
+  {%- for g in K.letters %}
+  <section class="letter-group" aria-labelledby="letter-{{ forloop.index }}">
+    <h2 class="letter" id="letter-{{ forloop.index }}">{{ g.letter }}</h2>
+    <div class="chips">
+      {%- for k in g.keywords %}
+      <a class="chip big" href="{{ k.url | relative_url }}">{{ k.name }} <span class="chip-count">{{ k.count }}</span></a>
+      {%- endfor %}
+    </div>
+  </section>
+  {%- endfor %}
+</div>

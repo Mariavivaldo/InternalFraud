@@ -1,0 +1,36 @@
+---
+layout: default
+---
+{%- assign L = page.list -%}
+<div class="list-page"{% if L.bg %} style="--bg: {{ L.bg }}; --fg: {{ L.fg }}"{% endif %}>
+  <header class="list-head">
+    <div class="{% if L.kind == 'region' %}pill{% else %}eyebrow{% endif %}">{{ L.eyebrow }}</div>
+    <h1 class="list-title">{{ L.heading }}</h1>
+    <p class="list-meta">{{ L.meta }}</p>
+  </header>
+
+  {%- for g in L.groups %}
+  <section class="day-group" aria-labelledby="day-{{ g.iso }}">
+    <h2 class="day-head" id="day-{{ g.iso }}"><a href="{{ g.url | relative_url }}">{{ g.date_long }}</a></h2>
+    {%- for it in g.items %}
+    <article class="card result" style="--bg: {{ it.bg }}; --fg: {{ it.fg }}">
+      <div class="result-top">
+        <a class="pill sm" href="{{ g.url | relative_url }}#{{ it.region }}">{{ it.region_upper }}</a>
+        <span class="kicker">{{ it.category_upper }} · {{ it.src_label }}</span>
+      </div>
+      <h3 class="result-title"><a href="{{ it.url | relative_url }}">{{ it.title }}</a></h3>
+      <p>{{ it.summary }}</p>
+      <div class="chips kw" aria-label="Keywords">
+        {%- for k in it.keywords -%}
+        {%- if k.slug == L.current_slug -%}
+        <a class="chip is-current" href="{{ k.url | relative_url }}" aria-current="page">{{ k.name }}</a>
+        {%- else -%}
+        <a class="chip" href="{{ k.url | relative_url }}">{{ k.name }}</a>
+        {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </article>
+    {%- endfor %}
+  </section>
+  {%- endfor %}
+</div>

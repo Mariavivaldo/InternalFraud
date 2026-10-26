@@ -1,0 +1,150 @@
+---
+layout: default
+---
+{%- assign b = page.board -%}
+
+{%- comment -%} ===== Daily board (the default view) ===== {%- endcomment -%}
+<section class="view view-board is-active" data-view="board" aria-labelledby="board-title">
+  <div class="board-head">
+    <div>
+      <div class="eyebrow">DAILY SUMMARY BY REGION</div>
+      <h1 class="board-title" id="board-title" tabindex="-1">{{ b.date_long }}</h1>
+    </div>
+    <ul class="stats" aria-label="Today in numbers">
+      <li><strong>{{ b.stats.incidents }}</strong> {{ b.stats.incidents_word }}</li>
+      <li><strong>{{ b.stats.sources }}</strong> {{ b.stats.sources_word }}</li>
+      <li><strong>{{ b.stats.follow_ups }}</strong> {{ b.stats.follow_ups_word }}</li>
+      <li><strong>{{ b.stats.reporting }}</strong> {{ b.stats.reporting_word }}</li>
+    </ul>
+  </div>
+  <p class="board-hint">Select a region for its detailed brief.</p>
+
+  <div class="region-grid" style="--n: {{ b.region_count }}">
+    {%- for r in b.regions %}
+    <section class="region-col" style="--bg: {{ r.bg }}; --fg: {{ r.fg }}" aria-label="{{ r.name }}">
+      <a class="region-btn" href="#{{ r.id }}" aria-label="Open {{ r.name }} brief, {{ r.count }} {% if r.count == 1 %}incident{% else %}incidents{% endif %}">
+        <span>{{ r.upper }}</span><span class="region-count">{{ r.count }}</span>
+      </a>
+      <div class="card summary-card">
+        <div class="statline">{{ r.stat_line }}</div>
+        <p>{{ r.summary }}</p>
+        {%- if r.has_incidents %}
+        <div class="breakdown">{{ r.breakdown }}</div>
+        {%- endif %}
+      </div>
+      {%- for inc in r.incidents %}
+      <article class="card mini">
+        <div class="kicker">{{ inc.category_upper }} · {{ inc.src_label }}</div>
+        <h2 class="mini-title"><a href="#{{ inc.anchor }}">{{ inc.title }}</a></h2>
+        <p>{{ inc.summary }}</p>
+      </article>
+      {%- endfor %}
+      {%- if r.has_incidents %}
+      <a class="btn-outline" href="#{{ r.id }}">Open {{ r.name }} brief →</a>
+      {%- else %}
+      <div class="empty">Nothing reported today. <a href="{{ r.history_url | relative_url }}">See recent days</a></div>
+      {%- endif %}
+    </section>
+    {%- endfor %}
+  </div>
+</section>
+
+{%- comment -%} ===== One regional brief per region (shown one at a time) ===== {%- endcomment -%}
+{%- for r in b.regions %}
+<section class="view view-region" data-view="{{ r.id }}" id="region-{{ r.id }}" style="--bg: {{ r.bg }}; --fg: {{ r.fg }}" aria-labelledby="title-{{ r.id }}">
+  <nav class="region-tabs" aria-label="Regions">
+    <a class="btn-outline back" href="#">← Daily board</a>
+    <span class="tabs-label">Regions</span>
+    {%- for t in b.regions %}
+    {%- if t.id == r.id %}
+    <a class="tab is-current" href="#{{ t.id }}" aria-current="page" style="--bg: {{ t.bg }}; --fg: {{ t.fg }}">{{ t.name }} · {{ t.count }}</a>
+    {%- else %}
+    <a class="tab" href="#{{ t.id }}">{{ t.name }} · {{ t.count }}</a>
+    {%- endif %}
+    {%- endfor %}
+  </nav>
+
+  <div class="brief">
+    <header class="brief-head">
+      <div class="pill">REGIONAL BRIEF</div>
+      <h1 class="brief-title" id="title-{{ r.id }}" tabindex="-1">{{ r.name }}</h1>
+      <div class="brief-meta">{{ b.date_long }} · {{ r.stat_line }}</div>
+    </header>
+
+    <div class="card overview">
+      <div class="eyebrow-sm">OVERALL SUMMARY</div>
+      <div class="overview-text">{{ r.overview | markdownify }}</div>
+      {%- if r.has_incidents %}
+      <div class="chips">{% for c in r.categories %}<span class="chip">{{ c }}</span>{% endfor %}</div>
+      {%- endif %}
+    </div>
+
+    {%- if r.is_empty %}
+    <div class="empty big">No incidents for {{ r.name }} today. <a href="{{ r.history_url | relative_url }}">See recent days</a></div>
+    {%- else %}
+    {%- assign lead = r.lead %}
+    <div class="brief-body">
+      <article class="card lead" id="{{ lead.dom_id }}">
+        <div class="kicker strong">LEAD · {{ lead.category_upper }} · {{ lead.src_label }}</div>
+        <h2 class="lead-title">{{ lead.title }}</h2>
+        <div class="lead-detail">{{ lead.detail | markdownify }}</div>
+        {%- if lead.has_prior %}
+        <div class="thread-box">Follows our coverage:{% for p in lead.prior %} <a href="{{ p.url | relative_url }}">{{ p.label }}</a>{% unless forloop.last %} ·{% endunless %}{% endfor %}</div>
+        {%- endif %}
+        {%- if lead.has_later %}
+        <div class="thread-box">Developments since:{% for p in lead.later %} <a href="{{ p.url | relative_url }}">{{ p.label }}</a>{% unless forloop.last %} ·{% endunless %}{% endfor %}</div>
+        {%- endif %}
+        {%- if lead.has_related %}
+        <div class="related">Related in another region:{% for x in lead.related %} <a href="#{{ x.anchor }}">{{ x.label }}</a>{% unless forloop.last %} ·{% endunless %}{% endfor %}</div>
+        {%- endif %}
+        <h3 class="eyebrow-sm sources-head">SOURCES, RANKED BY REPORTING QUALITY</h3>
+        <ol class="sources">
+          {%- for s in lead.sources %}
+          <li>
+            <span class="rank" aria-hidden="true">{{ s.rank }}</span>
+            <div class="src-body">
+              <a class="src-name" href="{{ s.url }}" target="_blank" rel="noopener noreferrer">{{ s.name }} ↗<span class="visually-hidden"> (opens in a new tab)</span></a>
+              {%- if s.primary %}<span class="primary"> — primary source</span>{% endif %}
+              {%- if s.has_note %}
+              <p>{{ s.note }}</p>
+              {%- endif %}
+            </div>
+          </li>
+          {%- endfor %}
+        </ol>
+        <div class="chips kw" aria-label="Keywords">{% for k in lead.keywords %}<a class="chip" href="{{ k.url | relative_url }}">{{ k.name }}</a>{% endfor %}</div>
+      </article>
+
+      <aside class="others" aria-labelledby="others-{{ r.id }}">
+        <h2 class="eyebrow" id="others-{{ r.id }}">ALSO TODAY IN {{ r.upper }}</h2>
+        {%- if r.no_others %}
+        <div class="empty">No other incidents today.</div>
+        {%- endif %}
+        {%- for o in r.others %}
+        <article class="card other" id="{{ o.dom_id }}">
+          <div class="kicker">{{ o.category_upper }} · {{ o.src_label }}</div>
+          <h3 class="other-title">{{ o.title }}</h3>
+          <div class="other-detail">{{ o.detail | markdownify }}</div>
+          {%- if o.has_prior %}
+          <div class="thread-line">Prior:{% for p in o.prior %} <a href="{{ p.url | relative_url }}">{{ p.short }}</a>{% unless forloop.last %} ·{% endunless %}{% endfor %}</div>
+          {%- endif %}
+          {%- if o.has_later %}
+          <div class="thread-line">Since:{% for p in o.later %} <a href="{{ p.url | relative_url }}">{{ p.short }}</a>{% unless forloop.last %} ·{% endunless %}{% endfor %}</div>
+          {%- endif %}
+          {%- if o.has_related %}
+          <div class="thread-line">Related:{% for x in o.related %} <a href="#{{ x.anchor }}">{{ x.label }}</a>{% unless forloop.last %} ·{% endunless %}{% endfor %}</div>
+          {%- endif %}
+          <div class="other-sources">
+            {%- for s in o.sources %}
+            <div><strong>{{ s.rank }}.</strong> <a href="{{ s.url }}" target="_blank" rel="noopener noreferrer">{{ s.name }} ↗<span class="visually-hidden"> (opens in a new tab)</span></a>{% if s.primary %}<span class="primary"> — primary</span>{% endif %}{% if s.has_note %}<div class="src-note">{{ s.note }}</div>{% endif %}</div>
+            {%- endfor %}
+          </div>
+          <div class="chips kw" aria-label="Keywords">{% for k in o.keywords %}<a class="chip" href="{{ k.url | relative_url }}">{{ k.name }}</a>{% endfor %}</div>
+        </article>
+        {%- endfor %}
+      </aside>
+    </div>
+    {%- endif %}
+  </div>
+</section>
+{%- endfor %}

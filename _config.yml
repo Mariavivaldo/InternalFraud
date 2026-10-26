@@ -1,0 +1,37 @@
+# Site settings ----------------------------------------------------------
+title: Fraud Board
+description: Daily antifraud news briefing, summarized by region, with links to the original sources.
+url: "https://mariavivaldo.github.io"
+baseurl: "/InternalFraud"   # the GitHub Actions build passes the correct value automatically
+
+# Each day's briefing is dated in US Eastern time, and a file dated "today"
+# is published even if GitHub's servers (on UTC) think it is still yesterday.
+timezone: America/New_York
+future: true
+
+# One briefing per day lives at /YYYY/MM/DD/
+permalink: /:year/:month/:day/
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: briefing
+
+# Files that are part of the project but not part of the website
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - docs/
+  - samples/
+  - scripts/
+  - lib/
+  - vendor/
+  - .bundle/
