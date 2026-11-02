@@ -195,6 +195,8 @@
     if (ev.key === 'Escape') close(false);
   });
   document.addEventListener('click', function (ev) {
-    if (!panel.hidden && !panel.contains(ev.target) && !toggle.contains(ev.target)) close(false);
+    // Use the event path: render() may already have removed ev.target from the panel
+    var path = ev.composedPath();
+    if (!panel.hidden && path.indexOf(panel) < 0 && path.indexOf(toggle) < 0) close(false);
   });
 })();
